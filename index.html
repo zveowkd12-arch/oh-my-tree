@@ -145,22 +145,22 @@
     }
     .btn-group {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       justify-content: space-between;
     }
     .action-btn {
       flex: 1;
-      height: 34px;
+      height: 29px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 0 8px;
-      border-radius: 9px;
+      padding: 0 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       font-family: 'Paperlogy', sans-serif;
-      font-size: 12.5px;
+      font-size: 11.5px;
       text-align: center;
       box-sizing: border-box;
       transition: all 0.15s ease;
@@ -538,7 +538,7 @@
 
     <div class="btn-group">
       <label class="action-btn green" for="photoInput">오너먼트 고르기</label>
-      <input type="file" id="photoInput" accept="image/*" capture="environment" />
+      <input type="file" id="photoInput" accept="image/*" multiple />
       <button class="action-btn red" onclick="undoOrnament()">취소</button>
       <button class="action-btn yellow" onclick="completeTree()">완성하기</button>
     </div>
@@ -648,6 +648,7 @@
       }
     }
     scene.add(floorGroup);
+
     // 밤하늘의 반짝이는 3D 픽셀 별 생성 (하늘 + 배경 바탕 전체 분포)
     const skyStarsGroup = new THREE.Group();
     const skyStarList = [];
@@ -1406,47 +1407,59 @@
       };
     }
 
-    // 사용자 사진 업로드 및 AI 배경 제거(누끼) 처리
+    // 사용자 사진 업로드 및 AI 배경 제거(누끼) 처리 (PC/모바일 다중 선택 지원)
     document.getElementById('photoInput').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
 
       const loadingEl = document.getElementById('loading-overlay');
       const textEl = document.getElementById('loading-text');
       loadingEl.style.display = 'flex';
-      textEl.textContent = 'AI가 사물을 감지해 누끼를 따고 있어요...';
+
+      let successCount = 0;
 
       try {
-        const cutoutCanvas = await extractSubjectCutout(file, (msg) => {
-          textEl.textContent = msg;
-        });
+        for (let idx = 0; idx < files.length; idx++) {
+          const file = files[idx];
+          const prefix = files.length > 1 ? `[${idx + 1}/${files.length}] ` : '';
+          textEl.textContent = `${prefix}AI가 사물을 감지해 누끼를 따고 있어요...`;
 
-        const { texture: tex, previewDataUrl } = createOrnamentTexture(cutoutCanvas);
-        currentTexture = tex;
+          const cutoutCanvas = await extractSubjectCutout(file, (msg) => {
+            textEl.textContent = `${prefix}${msg}`;
+          });
 
-        const emptyMsg = document.getElementById('inv-empty-msg');
-        if (emptyMsg) emptyMsg.remove();
-
-        const inv = document.getElementById('inventory');
-        document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
-
-        const newItem = document.createElement('div');
-        newItem.className = 'inv-item selected';
-        newItem.innerHTML = `<img src="${previewDataUrl}" alt="사물 오너먼트" />`;
-        newItem.onclick = () => {
-          if (newItem.classList.contains('selected')) {
-            clearOrnamentSelection();
-            return;
-          }
-          document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
-          newItem.classList.add('selected');
+          const { texture: tex, previewDataUrl } = createOrnamentTexture(cutoutCanvas);
           currentTexture = tex;
-          document.getElementById('status-bar').textContent = '오너먼트 선택됨! 트리를 터치해 달아보세요.';
-        };
-        inv.appendChild(newItem);
-        inv.scrollLeft = inv.scrollWidth;
 
-        document.getElementById('status-bar').textContent = '사물 누끼 완료! 트리를 터치해 오너먼트를 걸어보세요.';
+          const emptyMsg = document.getElementById('inv-empty-msg');
+          if (emptyMsg) emptyMsg.remove();
+
+          const inv = document.getElementById('inventory');
+          document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
+
+          const newItem = document.createElement('div');
+          newItem.className = 'inv-item selected';
+          newItem.innerHTML = `<img src="${previewDataUrl}" alt="사물 오너먼트" />`;
+          newItem.onclick = () => {
+            if (newItem.classList.contains('selected')) {
+              clearOrnamentSelection();
+              return;
+            }
+            document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
+            newItem.classList.add('selected');
+            currentTexture = tex;
+            document.getElementById('status-bar').textContent = '오너먼트 선택됨! 트리를 터치해 달아보세요.';
+          };
+          inv.appendChild(newItem);
+          inv.scrollLeft = inv.scrollWidth;
+          successCount++;
+        }
+
+        if (successCount > 1) {
+          document.getElementById('status-bar').textContent = `${successCount}개의 오너먼트가 추가되었습니다! 트리를 터치해 걸어보세요.`;
+        } else if (successCount === 1) {
+          document.getElementById('status-bar').textContent = '사물 누끼 완료! 트리를 터치해 오너먼트를 걸어보세요.';
+        }
       } catch (ex) {
         console.error(ex);
         document.getElementById('status-bar').textContent = '이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.';
