@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>3D 픽셀 크리스마스 트리 꾸미기</title>
+  <!-- 깔끔하고 현대적인 감성의 페이퍼로지(Paperlogy) 웹폰트 로드 -->
+  <style>
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+    }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #141e30;
+      font-family: 'Paperlogy', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* 상단 시간대 선택 바 */
+    #ui-top {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 28, 38, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 6px 12px;
+      border-radius: 999px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      color: #f8fafc;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+      z-index: 10;
+      font-size: 12.5px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .time-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: 'Paperlogy', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .time-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .time-btn.active {
+      background: #ffffff;
+      color: #141e30;
+      font-weight: 600;
+    }
+    /* 하단 컨트롤 패널 및 오너먼트 인벤토리 (슬림 납작형) */
+    #ui-bottom {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 94%;
+      max-width: 440px;
+      background: rgba(20, 28, 38, 0.84);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 8px 10px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      z-index: 10;
+      box-sizing: border-box;
+    }
+    .top-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.22);
+      margin: 0 2px;
+    }
+    .save-top-btn {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #f8fafc;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: 'Paperlogy', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .save-top-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .top-panel-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .size-compact {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 145px;
+      flex: 1.1;
+      background: rgba(15, 23, 34, 0.55);
+      padding: 6px 10px;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 11px;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+    .size-compact input[type="range"] {
+      width: 100%;
+      flex: 1;
+      min-width: 90px;
+      accent-color: #facc15;
+      cursor: pointer;
+    }
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+    }
+    .action-btn {
+      flex: 1;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0 8px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: 'Paperlogy', sans-serif;
+      font-size: 12.5px;
+      text-align: center;
+      box-sizing: border-box;
+      transition: all 0.15s ease;
+    }
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+    .action-btn.green {
+      background: #16a34a;
+      color: #ffffff;
+    }
+    .action-btn.green:hover {
+      background: #22c55e;
+    }
+    .action-btn.red {
+      background: #dc2626;
+      color: #ffffff;
+    }
+    .action-btn.red:hover {
+      background: #ef4444;
+    }
+    .action-btn.yellow {
+      background: #facc15;
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #1e293b;
+    }
+    .action-btn.yellow:hover {
+      background: #fde047;
+    }
+    input[type="file"] { display: none; }
+    
+    /* 오너먼트 선택 슬롯 */
+    #inventory {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 1px 0;
+      min-height: 36px;
+      align-items: center;
+    }
+    .inv-item {
+      width: 34px;
+      height: 34px;
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.15s ease;
+    }
+    .inv-item.selected {
+      border-color: #facc15;
+      box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.35);
+    }
+    .inv-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .inv-placeholder {
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      padding: 8px 0;
+    }
+    #status-bar {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      text-align: center;
+      margin-top: 1px;
+    }
+    /* 트리 감는 반짝이 조명 선택 바 */
+    .light-control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: rgba(15, 23, 34, 0.55);
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .light-label {
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .light-options {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .light-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-family: 'Paperlogy', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .light-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .light-btn.active {
+      border-color: rgba(250, 204, 21, 0.8);
+      background: rgba(250, 204, 21, 0.18);
+      color: #ffffff;
+    }
+    .light-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .light-dot.white { background: #ffffff; }
+    .light-dot.yellow { background: #fde047; }
+    .light-dot.red { background: #fb7185; }
+    .light-dot.mix {
+      background: conic-gradient(#fb7185, #fde047, #4ade80, #60a5fa, #fb7185);
+    }
+    /* AI 누끼 로딩 오버레이 */
+    #loading-overlay {
+      position: fixed; inset: 0; background: rgba(15, 23, 34, 0.72);
+      backdrop-filter: blur(6px);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      color: white; z-index: 100; font-size: 14px; font-weight: 500; gap: 12px;
+    }
+    /* 오너먼트 개별 삭제 확인 모달 */
+    #delete-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 16, 26, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+    }
+    .delete-modal-box {
+      background: rgba(24, 34, 46, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 20px 24px;
+      min-width: 230px;
+      max-width: 85vw;
+      text-align: center;
+      color: #f8fafc;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .delete-modal-text {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .delete-modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .modal-btn {
+      flex: 1;
+      height: 36px;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-family: 'Paperlogy', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .modal-btn.yes {
+      background: #dc2626;
+      color: #ffffff;
+    }
+    .modal-btn.yes:hover {
+      background: #ef4444;
+    }
+    .modal-btn.no {
+      background: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+    }
+    .modal-btn.no:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.25); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+  <!-- Three.js ES 모듈 임포트 맵 -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- 상단 시간대 설정 및 이미지 저장 UI -->
+  <div id="ui-top">
+    <span id="time-display">시간: 밤</span>
+    <div style="display:flex; gap:2px;">
+      <button class="time-btn active" onclick="setTimeMode('auto', this)">자동</button>
+      <button class="time-btn" onclick="setTimeMode('day', this)">낮</button>
+      <button class="time-btn" onclick="setTimeMode('night', this)">밤</button>
+    </div>
+    <span class="top-divider"></span>
+    <button class="save-top-btn" onclick="saveImage()">이미지 저장</button>
+  </div>
+
+  <!-- 하단 오너먼트 인벤토리 및 도구 UI (납작한 슬림 레이아웃) -->
+  <div id="ui-bottom">
+    <div class="top-panel-row">
+      <div id="inventory">
+        <div id="inv-empty-msg" class="inv-placeholder">오너먼트 고르기로 장식을 추가하세요</div>
+      </div>
+      <div class="size-compact">
+        <span>크기</span>
+        <input type="range" id="sizeRange" min="0.2" max="1.5" step="0.05" value="0.7" />
+      </div>
+    </div>
+
+    <!-- 트리 감는 반짝이 조명 선택 칸 (다시 누르면 해제) -->
+    <div class="light-control-row">
+      <span class="light-label">반짝이 조명</span>
+      <div class="light-options">
+        <button class="light-btn" data-light="white" onclick="toggleTreeLights('white', this)">
+          <span class="light-dot white"></span>하얀색
+        </button>
+        <button class="light-btn" data-light="yellow" onclick="toggleTreeLights('yellow', this)">
+          <span class="light-dot yellow"></span>노란색
+        </button>
+        <button class="light-btn" data-light="red" onclick="toggleTreeLights('red', this)">
+          <span class="light-dot red"></span>빨간색
+        </button>
+        <button class="light-btn" data-light="mix" onclick="toggleTreeLights('mix', this)">
+          <span class="light-dot mix"></span>혼합
+        </button>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <label class="action-btn green" for="photoInput">오너먼트 고르기</label>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" />
+      <button class="action-btn red" onclick="undoOrnament()">취소</button>
+      <button class="action-btn yellow" onclick="completeTree()">완성하기</button>
+    </div>
+    
+    <div id="status-bar">먼저 오너먼트 고르기 버튼으로 사진을 선택해주세요.</div>
+  </div>
+
+  <!-- AI 배경 제거 로딩 화면 -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text">AI 배경 제거(누끼) 처리 중...</div>
+  </div>
+
+  <!-- 오너먼트 삭제 확인 커스텀 모달 -->
+  <div id="delete-modal-overlay">
+    <div class="delete-modal-box">
+      <div class="delete-modal-text">삭제 할까요??</div>
+      <div class="delete-modal-actions">
+        <button class="modal-btn yes" id="confirmDeleteYes">네</button>
+        <button class="modal-btn no" id="confirmDeleteNo">아니오</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // 씬 기본 세팅
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x162238);
+    scene.fog = new THREE.FogExp2(0x162238, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 4, 11);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // 조명 설정
+    const ambientLight = new THREE.AmbientLight(0xddeeff, 1.2);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfffaed, 1.6);
+    dirLight.position.set(6, 12, 8);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    scene.add(dirLight);
+
+    const fillLight = new THREE.DirectionalLight(0x88bbff, 0.6);
+    fillLight.position.set(-6, 4, -8);
+    scene.add(fillLight);
+
+    // 카메라 마우스/터치 회전 컨트롤 설정
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 3.05, 0);
+    controls.maxPolarAngle = Math.PI / 2 - 0.02;
+
+    // 트리 및 바닥 전체 Y 오프셋 (아래로 살짝 내려 상단 하늘 여유 확보)
+    const sceneGroundOffsetY = -0.55;
+
+    // 픽셀 눈바닥 생성 (아담한 크기로 축소)
+    const floorGroup = new THREE.Group();
+    floorGroup.position.y = sceneGroundOffsetY;
+    const snowMat = new THREE.MeshStandardMaterial({ color: 0xf0f4f8, roughness: 0.9 });
+    for (let x = -4; x <= 4; x++) {
+      for (let z = -4; z <= 4; z++) {
+        const dist = Math.sqrt(x * x + z * z);
+        if (dist < 4.3) {
+          const h = Math.max(0.14, 0.52 - dist * 0.07);
+          const block = new THREE.Mesh(new THREE.BoxGeometry(0.95, h, 0.95), snowMat);
+          block.position.set(x, h / 2 - 0.05, z);
+          block.receiveShadow = true;
+          floorGroup.add(block);
+        }
+      }
+    }
+    scene.add(floorGroup);
+    // 밤하늘의 반짝이는 3D 픽셀 별 생성 (하늘 + 배경 바탕 전체 분포)
+    const skyStarsGroup = new THREE.Group();
+    const skyStarList = [];
+    const starColors = [0xffffff, 0xfff3b0, 0xdbeafe, 0xfef08a];
+    const starGeo = new THREE.BoxGeometry(0.14, 0.14, 0.14);
+
+    for (let i = 0; i < 320; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      // 위쪽 하늘부터 바닥 근처 배경 바탕까지 폭넓게 분포
+      const phi = Math.acos(1 - Math.random() * 1.12);
+      const radius = 14 + Math.random() * 18;
+
+      const sx = radius * Math.sin(phi) * Math.cos(theta);
+      const sy = Math.max(-1.2, 0.5 + radius * Math.cos(phi));
+      const sz = radius * Math.sin(phi) * Math.sin(theta);
+
+      const mat = new THREE.MeshBasicMaterial({
+        color: starColors[i % starColors.length],
+        transparent: true,
+        opacity: 0.95,
+        fog: false
+      });
+
+      const starVoxel = new THREE.Mesh(starGeo, mat);
+      starVoxel.position.set(sx, sy, sz);
+      const baseScale = 0.55 + Math.random() * 0.75;
+      starVoxel.scale.setScalar(baseScale);
+
+      skyStarsGroup.add(starVoxel);
+      skyStarList.push({
+        mesh: starVoxel,
+        baseScale,
+        speed: 1.5 + Math.random() * 2.5,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+    scene.add(skyStarsGroup);
+
+    // 천체 은은한 후광 텍스처 생성 헬퍼
+    function createCelestialGlow(innerColor, midColor) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(64, 64, 6, 64, 64, 64);
+      grad.addColorStop(0, innerColor);
+      grad.addColorStop(0.45, midColor);
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+      const tex = new THREE.CanvasTexture(canvas);
+      const mat = new THREE.SpriteMaterial({
+        map: tex,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog: false
+      });
+      return new THREE.Sprite(mat);
+    }
+
+    // 밤하늘의 디테일 복셀 달 생성 (입체 음영 + 다중 분화구 픽셀)
+    const moonGroup = new THREE.Group();
+    const moonBrightMat = new THREE.MeshBasicMaterial({ color: 0xfffbe6, fog: false });
+    const moonMidMat = new THREE.MeshBasicMaterial({ color: 0xfde68a, fog: false });
+    const moonCraterLightMat = new THREE.MeshBasicMaterial({ color: 0xe2c777, fog: false });
+    const moonCraterDarkMat = new THREE.MeshBasicMaterial({ color: 0xbda256, fog: false });
+    const moonVoxelSize = 0.24;
+
+    const craters = [
+      { cx: -0.35, cy: 0.35, cz: 0.9, r: 0.44, deep: true },
+      { cx: 0.42, cy: -0.25, cz: 0.85, r: 0.38, deep: true },
+      { cx: 0.1, cy: 0.55, cz: 0.78, r: 0.28, deep: false },
+      { cx: -0.45, cy: -0.45, cz: 0.75, r: 0.32, deep: false },
+      { cx: 0.58, cy: 0.28, cz: 0.72, r: 0.25, deep: false }
+    ];
+
+    for (let x = -4; x <= 4; x++) {
+      for (let y = -4; y <= 4; y++) {
+        for (let z = -4; z <= 4; z++) {
+          const d = Math.sqrt(x * x + y * y + z * z);
+          if (d <= 4.15 && d >= 2.6) {
+            const nx = x / 4.15;
+            const ny = y / 4.15;
+            const nz = z / 4.15;
+
+            let hitCrater = null;
+            for (const c of craters) {
+              const cd = Math.sqrt((nx - c.cx) ** 2 + (ny - c.cy) ** 2 + (nz - c.cz) ** 2);
+              if (cd < c.r) {
+                hitCrater = c;
+                break;
+              }
+            }
+
+            let mat = moonBrightMat;
+            if (hitCrater) {
+              mat = hitCrater.deep ? moonCraterDarkMat : moonCraterLightMat;
+            } else if (nx < -0.35 || ny < -0.4) {
+              mat = moonMidMat;
+            }
+
+            const v = new THREE.Mesh(
+              new THREE.BoxGeometry(moonVoxelSize, moonVoxelSize, moonVoxelSize),
+              mat
+            );
+            v.position.set(x * moonVoxelSize, y * moonVoxelSize, z * moonVoxelSize);
+            moonGroup.add(v);
+          }
+        }
+      }
+    }
+    const moonGlow = createCelestialGlow('rgba(254, 249, 195, 0.5)', 'rgba(253, 224, 71, 0.14)');
+    moonGlow.scale.set(5.4, 5.4, 1);
+    moonGroup.add(moonGlow);
+    moonGroup.position.set(-7.5, 9.8, -14);
+    scene.add(moonGroup);
+
+    // 낮하늘의 복셀 태양 생성
+    const sunGroup = new THREE.Group();
+    const sunCoreMat = new THREE.MeshBasicMaterial({ color: 0xffef7a, fog: false });
+    const sunRayMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, fog: false });
+    const sunVoxelSize = 0.26;
+    for (let x = -3; x <= 3; x++) {
+      for (let y = -3; y <= 3; y++) {
+        for (let z = -3; z <= 3; z++) {
+          const d = Math.sqrt(x * x + y * y + z * z);
+          if (d <= 3.1 && d >= 1.8) {
+            const v = new THREE.Mesh(
+              new THREE.BoxGeometry(sunVoxelSize, sunVoxelSize, sunVoxelSize),
+              sunCoreMat
+            );
+            v.position.set(x * sunVoxelSize, y * sunVoxelSize, z * sunVoxelSize);
+            sunGroup.add(v);
+          }
+        }
+      }
+    }
+    const rayOffsets = [
+      [4.5, 0], [-4.5, 0], [0, 4.5], [0, -4.5],
+      [3.3, 3.3], [-3.3, 3.3], [3.3, -3.3], [-3.3, -3.3]
+    ];
+    rayOffsets.forEach(([rx, ry]) => {
+      const ray = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 0.28), sunRayMat);
+      ray.position.set(rx * sunVoxelSize, ry * sunVoxelSize, 0);
+      sunGroup.add(ray);
+    });
+    const sunGlow = createCelestialGlow('rgba(255, 250, 205, 0.72)', 'rgba(250, 204, 21, 0.2)');
+    sunGlow.scale.set(6.8, 6.8, 1);
+    sunGroup.add(sunGlow);
+    sunGroup.position.set(7.5, 10.2, -14);
+    sunGroup.visible = false;
+    scene.add(sunGroup);
+
+    // 초고밀도 풍성한 8갈래 복셀 트리 생성
+    const treeGroup = new THREE.Group();
+    treeGroup.position.y = sceneGroundOffsetY;
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2e16, roughness: 0.95 });
+    const trunkBarkMat = new THREE.MeshStandardMaterial({ color: 0x3b230f, roughness: 0.95 });
+    const leafDeepMat = new THREE.MeshStandardMaterial({ color: 0x163b1c, roughness: 0.88 });
+    const leafDarkMat = new THREE.MeshStandardMaterial({ color: 0x225429, roughness: 0.84 });
+    const leafMidMat = new THREE.MeshStandardMaterial({ color: 0x2f7037, roughness: 0.80 });
+    const leafLightMat = new THREE.MeshStandardMaterial({ color: 0x448f4d, roughness: 0.76 });
+    const frostTipMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, roughness: 0.65 });
+
+    const leafMeshes = [];
+
+    // 나무 기둥 (잘 보이도록 굵고 높게 배치)
+    for (let y = 0; y < 7; y++) {
+      for (let x = -1; x <= 1; x++) {
+        for (let z = -1; z <= 1; z++) {
+          if (Math.abs(x) === 1 && Math.abs(z) === 1 && y > 1) continue;
+          const isBark = (x + y + z) % 2 === 0;
+          const trunkBlock = new THREE.Mesh(
+            new THREE.BoxGeometry(0.28, 0.28, 0.28),
+            isBark ? trunkBarkMat : trunkMat
+          );
+          trunkBlock.position.set(x * 0.26, y * 0.26 + 0.14, z * 0.26);
+          trunkBlock.castShadow = true;
+          trunkBlock.receiveShadow = true;
+          treeGroup.add(trunkBlock);
+        }
+      }
+    }
+
+    // 풍성한 8갈래 가지 및 초고밀도 나뭇잎 복셀 (78층)
+    const totalLayers = 78;
+    const layerHeight = 0.068;
+    const startY = 1.48;
+    let treeTopY = startY;
+
+    for (let i = 0; i < totalLayers; i++) {
+      const y = startY + (i * layerHeight);
+      treeTopY = y;
+      const progress = i / totalLayers;
+
+      const coneBase = Math.pow(1.0 - progress, 0.88) * 2.15;
+      const tierWave = 1.0 + Math.sin(progress * Math.PI * 10.5) * 0.13 * (1.0 - progress * 0.45);
+      const maxRadius = Math.max(0.11, coneBase * tierWave);
+
+      const outerCount = Math.max(12, Math.floor(maxRadius * 36));
+      for (let j = 0; j < outerCount; j++) {
+        const angle = (j / outerCount) * Math.PI * 2 + (i * 0.11);
+        const boughLobe = 0.84 + 0.18 * Math.cos(angle * 8 + i * 0.15);
+        const r = maxRadius * boughLobe * (0.9 + Math.sin(j * 5 + i * 2) * 0.1);
+        const droop = Math.max(0, (r / 2.15) * 0.085);
+
+        const bx = Math.cos(angle) * r;
+        const bz = Math.sin(angle) * r;
+
+        let mat = leafMidMat;
+        const hash = Math.abs(Math.sin(i * 12.9898 + j * 78.233));
+        if (r > maxRadius * 0.94 && hash > 0.84 && progress < 0.92) {
+          mat = frostTipMat;
+        } else if (r > maxRadius * 0.84) {
+          mat = leafLightMat;
+        } else if (r < maxRadius * 0.68) {
+          mat = leafDarkMat;
+        }
+
+        const leafBlock = new THREE.Mesh(
+          new THREE.BoxGeometry(0.105, 0.084, 0.105),
+          mat
+        );
+        leafBlock.position.set(bx, y - droop, bz);
+        leafBlock.castShadow = true;
+        leafBlock.receiveShadow = true;
+        treeGroup.add(leafBlock);
+        leafMeshes.push(leafBlock);
+      }
+
+      // 풍성한 볼륨감을 위한 중간·내부 잎사귀 밀도 보강 레이어
+      if (maxRadius > 0.25) {
+        const midCount = Math.max(8, Math.floor(maxRadius * 22));
+        for (let m = 0; m < midCount; m++) {
+          const angle = (m / midCount) * Math.PI * 2 + (i * 0.23);
+          const mr = maxRadius * (0.48 + (m % 3) * 0.14);
+          const midBlock = new THREE.Mesh(
+            new THREE.BoxGeometry(0.115, 0.088, 0.115),
+            m % 2 === 0 ? leafDarkMat : leafDeepMat
+          );
+          midBlock.position.set(Math.cos(angle) * mr, y - 0.02, Math.sin(angle) * mr);
+          midBlock.castShadow = true;
+          midBlock.receiveShadow = true;
+          treeGroup.add(midBlock);
+        }
+      }
+    }
+    scene.add(treeGroup);
+
+    // 트리를 감싸는 반짝이 조명 그룹 및 상태 관리
+    const treeLightsGroup = new THREE.Group();
+    treeGroup.add(treeLightsGroup);
+    let treeLightBulbs = [];
+    let activeLightMode = null;
+    const lightNames = {
+      white: '하얀색',
+      yellow: '노란색',
+      red: '빨간색',
+      mix: '혼합'
+    };
+
+    const lightPalettes = {
+      white: [0xffffff, 0xf8fafc],
+      yellow: [0xfef08a, 0xfde047],
+      red: [0xfca5a5, 0xf87171],
+      mix: [0xfca5a5, 0xfef08a, 0x86efac, 0x93c5fd, 0xffffff]
+    };
+
+    function createBulbGlowTexture(hexColor) {
+      const c = document.createElement('canvas');
+      c.width = 64;
+      c.height = 64;
+      const ctx = c.getContext('2d');
+      const color = new THREE.Color(hexColor);
+      const r = Math.round(color.r * 255);
+      const g = Math.round(color.g * 255);
+      const b = Math.round(color.b * 255);
+
+      const grad = ctx.createRadialGradient(32, 32, 1, 32, 32, 32);
+      grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.72)`);
+      grad.addColorStop(0.38, `rgba(${r}, ${g}, ${b}, 0.24)`);
+      grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 64, 64);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const glowTexCache = {};
+    function getBulbGlowTexture(hexColor) {
+      if (!glowTexCache[hexColor]) {
+        glowTexCache[hexColor] = createBulbGlowTexture(hexColor);
+      }
+      return glowTexCache[hexColor];
+    }
+
+    function clearTreeLights() {
+      while (treeLightsGroup.children.length > 0) {
+        const child = treeLightsGroup.children[0];
+        treeLightsGroup.remove(child);
+      }
+      treeLightBulbs = [];
+    }
+
+    window.toggleTreeLights = function(mode, btnEl) {
+      document.querySelectorAll('.light-btn').forEach(b => b.classList.remove('active'));
+
+      if (activeLightMode === mode) {
+        activeLightMode = null;
+        clearTreeLights();
+        document.getElementById('status-bar').textContent = '반짝이 조명을 해제했습니다.';
+        return;
+      }
+
+      activeLightMode = mode;
+      if (btnEl) btnEl.classList.add('active');
+      clearTreeLights();
+
+      const palette = lightPalettes[mode];
+      const bulbCount = 58;
+      const bulbGeo = new THREE.BoxGeometry(0.068, 0.068, 0.068);
+
+      for (let i = 0; i < bulbCount; i++) {
+        const t = Math.pow(Math.random(), 0.75);
+        const y = startY + 0.14 + t * (treeTopY - startY - 0.22);
+        const angle = Math.random() * Math.PI * 2;
+
+        const coneBase = Math.pow(1.0 - t, 0.88) * 2.15;
+        const tierWave = 1.0 + Math.sin(t * Math.PI * 10.5) * 0.13 * (1.0 - t * 0.45);
+        const boughLobe = 0.84 + 0.18 * Math.cos(angle * 8 + (t * totalLayers) * 0.15);
+        const r = Math.max(0.16, coneBase * tierWave * boughLobe) + 0.04;
+
+        const bx = Math.cos(angle) * r;
+        const bz = Math.sin(angle) * r;
+
+        const hex = palette[Math.floor(Math.random() * palette.length)];
+        const mat = new THREE.MeshBasicMaterial({
+          color: hex,
+          transparent: true,
+          opacity: 0.78,
+          fog: false
+        });
+
+        const bulb = new THREE.Mesh(bulbGeo, mat);
+        bulb.position.set(bx, y, bz);
+
+        const glowMat = new THREE.SpriteMaterial({
+          map: getBulbGlowTexture(hex),
+          transparent: true,
+          opacity: 0.55,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: false
+        });
+        const glow = new THREE.Sprite(glowMat);
+        glow.scale.set(0.28, 0.28, 1);
+        bulb.add(glow);
+
+        treeLightsGroup.add(bulb);
+        treeLightBulbs.push({
+          bulb,
+          glow,
+          phase: Math.random() * Math.PI * 2,
+          speed: 2.0 + Math.random() * 2.6
+        });
+      }
+
+      document.getElementById('status-bar').textContent = `${lightNames[mode]} 반짝이 조명을 켰습니다. 다시 누르면 꺼집니다.`;
+    };
+
+    // 꼭대기 3D 금빛 5각 별 생성 (아담하고 세련된 비율)
+    const starGroup = new THREE.Group();
+
+    function createStarShape(outerRadius, innerRadius, points) {
+      const shape = new THREE.Shape();
+      for (let i = 0; i < points * 2; i++) {
+        const r = i % 2 === 0 ? outerRadius : innerRadius;
+        const angle = (i * Math.PI) / points + Math.PI / 2;
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        if (i === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+      }
+      shape.closePath();
+      return shape;
+    }
+
+    const starShape = createStarShape(0.28, 0.125, 5);
+    const starGeometry = new THREE.ExtrudeGeometry(starShape, {
+      depth: 0.09,
+      bevelEnabled: true,
+      bevelSegments: 2,
+      steps: 1,
+      bevelSize: 0.025,
+      bevelThickness: 0.025
+    });
+    starGeometry.center();
+
+    const starMat = new THREE.MeshStandardMaterial({
+      color: 0xffe047,
+      emissive: 0xffaa00,
+      emissiveIntensity: 0.9,
+      roughness: 0.25,
+      metalness: 0.4
+    });
+    const starMesh = new THREE.Mesh(starGeometry, starMat);
+    starGroup.add(starMesh);
+
+    const starAuraMat = new THREE.MeshBasicMaterial({
+      color: 0xfff59d,
+      transparent: true,
+      opacity: 0.3,
+      fog: false
+    });
+    const starAuraMesh = new THREE.Mesh(starGeometry, starAuraMat);
+    starAuraMesh.scale.setScalar(1.16);
+    starGroup.add(starAuraMesh);
+
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 128;
+    glowCanvas.height = 128;
+    const gCtx = glowCanvas.getContext('2d');
+    const grad = gCtx.createRadialGradient(64, 64, 4, 64, 64, 64);
+    grad.addColorStop(0, 'rgba(255, 245, 170, 0.85)');
+    grad.addColorStop(0.45, 'rgba(255, 200, 40, 0.3)');
+    grad.addColorStop(1, 'rgba(255, 180, 0, 0)');
+    gCtx.fillStyle = grad;
+    gCtx.fillRect(0, 0, 128, 128);
+
+    const glowTex = new THREE.CanvasTexture(glowCanvas);
+    const glowMat = new THREE.SpriteMaterial({
+      map: glowTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false
+    });
+    const glowSprite = new THREE.Sprite(glowMat);
+    glowSprite.scale.set(1.25, 1.25, 1);
+    starGroup.add(glowSprite);
+
+    const starPointLight = new THREE.PointLight(0xffd54f, 1.3, 4.5);
+    starGroup.add(starPointLight);
+
+    starGroup.position.set(0, 8.0 + sceneGroundOffsetY, 0);
+    starGroup.visible = false;
+    scene.add(starGroup);
+
+    let isStarAnimating = false;
+    let starAnimProgress = 0;
+
+    // 오너먼트 관리 (샘플 없음 - 사용자가 직접 고른 사진만 사용)
+    const ornaments = [];
+    let currentTexture = null;
+
+    // 캔버스에서 유효 픽셀 경계(Bounding Box) 탐색
+    function getValidAlphaBounds(ctx, width, height, alphaThreshold = 15) {
+      const { data } = ctx.getImageData(0, 0, width, height);
+      let minX = width, minY = height, maxX = -1, maxY = -1;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const alpha = data[(y * width + x) * 4 + 3];
+          if (alpha > alphaThreshold) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (maxX < minX || maxY < minY) {
+        return { x: 0, y: 0, w: width, h: height, valid: false };
+      }
+      return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1, valid: true };
+    }
+
+    // 배경이 실제로 투명하게 분리되었는지 비율 검증
+    function hasMeaningfulTransparency(ctx, width, height) {
+      const { data } = ctx.getImageData(0, 0, width, height);
+      let transparentCount = 0;
+      let opaqueCount = 0;
+      const total = width * height;
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 30) transparentCount++;
+        else if (data[i] > 210) opaqueCount++;
+      }
+      const transRatio = transparentCount / total;
+      const opaqueRatio = opaqueCount / total;
+      return transRatio > 0.04 && opaqueRatio > 0.03 && opaqueRatio < 0.96;
+    }
+
+    // 내장 스마트 외곽선 분리 누끼 엔진 (AI 모델 차단 시 폴백)
+    function smartEdgeCutoutCanvas(img) {
+      const maxDim = 512;
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      let transparentPixels = 0;
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 40) transparentPixels++;
+      }
+      if (transparentPixels / (w * h) > 0.08) return canvas;
+
+      const borderSamples = [];
+      const step = Math.max(1, Math.floor(Math.min(w, h) / 40));
+      for (let x = 0; x < w; x += step) {
+        borderSamples.push(0 * w + x, (h - 1) * w + x);
+      }
+      for (let y = 0; y < h; y += step) {
+        borderSamples.push(y * w + 0, y * w + (w - 1));
+      }
+
+      const bgColors = [];
+      for (const idx of borderSamples) {
+        const p = idx * 4;
+        const r = data[p], g = data[p + 1], b = data[p + 2];
+        if (!bgColors.some(c => Math.abs(c[0] - r) + Math.abs(c[1] - g) + Math.abs(c[2] - b) < 42)) {
+          bgColors.push([r, g, b]);
+          if (bgColors.length >= 14) break;
+        }
+      }
+
+      const visited = new Uint8Array(w * h);
+      const queue = new Int32Array(w * h);
+      let head = 0, tail = 0;
+
+      const isBgColor = (p) => {
+        const r = data[p], g = data[p + 1], b = data[p + 2];
+        for (let i = 0; i < bgColors.length; i++) {
+          const c = bgColors[i];
+          const dist = Math.abs(c[0] - r) + Math.abs(c[1] - g) + Math.abs(c[2] - b);
+          if (dist < 62) return true;
+        }
+        return false;
+      };
+
+      const pushPixel = (x, y) => {
+        if (x < 0 || x >= w || y < 0 || y >= h) return;
+        const idx = y * w + x;
+        if (visited[idx]) return;
+        visited[idx] = 1;
+        if (isBgColor(idx * 4)) {
+          queue[tail++] = idx;
+        }
+      };
+
+      for (let x = 0; x < w; x++) {
+        pushPixel(x, 0);
+        pushPixel(x, h - 1);
+      }
+      for (let y = 0; y < h; y++) {
+        pushPixel(0, y);
+        pushPixel(w - 1, y);
+      }
+
+      while (head < tail) {
+        const idx = queue[head++];
+        const x = idx % w;
+        const y = (idx - x) / w;
+        data[idx * 4 + 3] = 0;
+
+        pushPixel(x + 1, y);
+        pushPixel(x - 1, y);
+        pushPixel(x, y + 1);
+        pushPixel(x, y - 1);
+      }
+
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const idx = y * w + x;
+          if (data[idx * 4 + 3] > 0) {
+            let zeroNeighbors = 0;
+            if (data[(idx - 1) * 4 + 3] === 0) zeroNeighbors++;
+            if (data[(idx + 1) * 4 + 3] === 0) zeroNeighbors++;
+            if (data[(idx - w) * 4 + 3] === 0) zeroNeighbors++;
+            if (data[(idx + w) * 4 + 3] === 0) zeroNeighbors++;
+            if (zeroNeighbors >= 2) {
+              data[idx * 4 + 3] = 110;
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return canvas;
+    }
+
+    // 1순위/2순위 AI 엔진 + 스마트 외곽선 결합 배경 제거 함수
+    async function extractSubjectCutout(file, onProgress) {
+      const originalImg = await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const im = new Image();
+        im.onload = () => { URL.revokeObjectURL(url); resolve(im); };
+        im.onerror = reject;
+        im.src = url;
+      });
+
+      // 1단계: @imgly/background-removal 시도
+      try {
+        onProgress('AI 사물 윤곽선 분석 중...');
+        const imglyMod = await import('https://esm.sh/@imgly/background-removal@1.4.5');
+        const removeBgFn = imglyMod.removeBackground || imglyMod.default;
+        if (typeof removeBgFn === 'function') {
+          const blob = await removeBgFn(file, {
+            progress: (key, cur, tot) => {
+              if (tot > 0) {
+                const pct = Math.min(99, Math.round((cur / tot) * 100));
+                onProgress(`AI 사물 감지 및 배경 제거 중... (${pct}%)`);
+              }
+            }
+          });
+          const resImg = await blobToImage(blob);
+          const testCanvas = document.createElement('canvas');
+          testCanvas.width = resImg.width;
+          testCanvas.height = resImg.height;
+          const tCtx = testCanvas.getContext('2d');
+          tCtx.drawImage(resImg, 0, 0);
+          if (hasMeaningfulTransparency(tCtx, resImg.width, resImg.height)) {
+            return testCanvas;
+          }
+        }
+      } catch (e1) {
+        console.warn('1차 AI 누끼 모델 우회:', e1);
+      }
+
+      // 2단계: Transformers.js (RMBG-1.4) AI 세그멘테이션 시도
+      try {
+        onProgress('고정밀 AI 윤곽선 모델 실행 중...');
+        const { pipeline, env, RawImage } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+        env.allowLocalModels = false;
+        const segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4');
+        const url = URL.createObjectURL(file);
+        const rawImg = await RawImage.fromURL(url);
+        URL.revokeObjectURL(url);
+        const output = await segmenter(rawImg);
+        const mask = Array.isArray(output) ? output[0].mask : output.mask;
+
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = originalImg.width;
+        outCanvas.height = originalImg.height;
+        const outCtx = outCanvas.getContext('2d');
+        outCtx.drawImage(originalImg, 0, 0);
+
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = mask.width;
+        maskCanvas.height = mask.height;
+        const mCtx = maskCanvas.getContext('2d');
+        const mData = mCtx.createImageData(mask.width, mask.height);
+        for (let i = 0; i < mask.data.length; i++) {
+          const val = mask.data[i];
+          mData.data[i * 4] = 255;
+          mData.data[i * 4 + 1] = 255;
+          mData.data[i * 4 + 2] = 255;
+          mData.data[i * 4 + 3] = val;
+        }
+        mCtx.putImageData(mData, 0, 0);
+
+        const scaledMask = document.createElement('canvas');
+        scaledMask.width = originalImg.width;
+        scaledMask.height = originalImg.height;
+        scaledMask.getContext('2d').drawImage(maskCanvas, 0, 0, originalImg.width, originalImg.height);
+
+        const finalData = outCtx.getImageData(0, 0, outCanvas.width, outCanvas.height);
+        const sMaskData = scaledMask.getContext('2d').getImageData(0, 0, outCanvas.width, outCanvas.height).data;
+        for (let i = 3; i < finalData.data.length; i += 4) {
+          finalData.data[i] = sMaskData[i];
+        }
+        outCtx.putImageData(finalData, 0, 0);
+
+        if (hasMeaningfulTransparency(outCtx, outCanvas.width, outCanvas.height)) {
+          return outCanvas;
+        }
+      } catch (e2) {
+        console.warn('2차 AI 모델 우회, 내장 외곽선 엔진 사용:', e2);
+      }
+
+      // 3단계: 내장 스마트 외곽선 분리 엔진 실행
+      onProgress('사물 윤곽선 정밀 추출 중...');
+      return smartEdgeCutoutCanvas(originalImg);
+    }
+
+    function blobToImage(blob) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    // 사물 윤곽선 그대로의 오너먼트 텍스처 생성 (테두리·아이콘 없이 깔끔한 누끼 실루엣)
+    function createOrnamentTexture(sourceCanvasOrImg) {
+      const srcCanvas = document.createElement('canvas');
+      srcCanvas.width = sourceCanvasOrImg.width;
+      srcCanvas.height = sourceCanvasOrImg.height;
+      const srcCtx = srcCanvas.getContext('2d');
+      srcCtx.drawImage(sourceCanvasOrImg, 0, 0);
+
+      // 반투명 픽셀 정리로 누끼 윤곽선 선명도 강화
+      const cleanImgData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+      const px = cleanImgData.data;
+      for (let i = 3; i < px.length; i += 4) {
+        if (px[i] < 95) px[i] = 0;
+        else if (px[i] > 180) px[i] = 255;
+      }
+      srcCtx.putImageData(cleanImgData, 0, 0);
+
+      const bounds = getValidAlphaBounds(srcCtx, srcCanvas.width, srcCanvas.height, 95);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+
+      const pad = 16;
+      const availW = canvas.width - pad * 2;
+      const availH = canvas.height - pad * 2;
+      const scale = Math.min(availW / bounds.w, availH / bounds.h);
+      const drawW = bounds.w * scale;
+      const drawH = bounds.h * scale;
+      const drawX = (canvas.width - drawW) / 2;
+      const drawY = (canvas.height - drawH) / 2;
+
+      // 자연스러운 입체 그림자만 추가하고 외곽선이나 아이콘은 그리지 않음
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.42)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 4;
+      ctx.drawImage(
+        srcCanvas,
+        bounds.x, bounds.y, bounds.w, bounds.h,
+        drawX, drawY, drawW, drawH
+      );
+      ctx.restore();
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      return {
+        texture,
+        previewDataUrl: canvas.toDataURL('image/png')
+      };
+    }
+
+    // 사용자 사진 업로드 및 AI 배경 제거(누끼) 처리
+    document.getElementById('photoInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const loadingEl = document.getElementById('loading-overlay');
+      const textEl = document.getElementById('loading-text');
+      loadingEl.style.display = 'flex';
+      textEl.textContent = 'AI가 사물을 감지해 누끼를 따고 있어요...';
+
+      try {
+        const cutoutCanvas = await extractSubjectCutout(file, (msg) => {
+          textEl.textContent = msg;
+        });
+
+        const { texture: tex, previewDataUrl } = createOrnamentTexture(cutoutCanvas);
+        currentTexture = tex;
+
+        const emptyMsg = document.getElementById('inv-empty-msg');
+        if (emptyMsg) emptyMsg.remove();
+
+        const inv = document.getElementById('inventory');
+        document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
+
+        const newItem = document.createElement('div');
+        newItem.className = 'inv-item selected';
+        newItem.innerHTML = `<img src="${previewDataUrl}" alt="사물 오너먼트" />`;
+        newItem.onclick = () => {
+          if (newItem.classList.contains('selected')) {
+            clearOrnamentSelection();
+            return;
+          }
+          document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
+          newItem.classList.add('selected');
+          currentTexture = tex;
+          document.getElementById('status-bar').textContent = '오너먼트 선택됨! 트리를 터치해 달아보세요.';
+        };
+        inv.appendChild(newItem);
+        inv.scrollLeft = inv.scrollWidth;
+
+        document.getElementById('status-bar').textContent = '사물 누끼 완료! 트리를 터치해 오너먼트를 걸어보세요.';
+      } catch (ex) {
+        console.error(ex);
+        document.getElementById('status-bar').textContent = '이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+      } finally {
+        loadingEl.style.display = 'none';
+        e.target.value = '';
+      }
+    });
+
+    // 오너먼트 선택 해제 헬퍼 함수 (허공 클릭 또는 선택된 슬롯 재클릭 시 호출)
+    function clearOrnamentSelection() {
+      if (!currentTexture) return;
+      currentTexture = null;
+      document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
+      document.getElementById('status-bar').textContent = '오너먼트 선택이 해제되었습니다.';
+    }
+
+    // 오너먼트 개별 삭제 확인 모달 제어
+    const deleteModal = document.getElementById('delete-modal-overlay');
+    let pendingDeleteSprite = null;
+
+    function openDeleteConfirm(sprite) {
+      pendingDeleteSprite = sprite;
+      deleteModal.style.display = 'flex';
+    }
+
+    function closeDeleteConfirm() {
+      pendingDeleteSprite = null;
+      deleteModal.style.display = 'none';
+    }
+
+    document.getElementById('confirmDeleteYes').addEventListener('click', () => {
+      if (pendingDeleteSprite) {
+        treeGroup.remove(pendingDeleteSprite);
+        const idx = ornaments.indexOf(pendingDeleteSprite);
+        if (idx !== -1) ornaments.splice(idx, 1);
+        document.getElementById('status-bar').textContent = `오너먼트를 삭제했습니다. (남은 개수: ${ornaments.length}개)`;
+      }
+      closeDeleteConfirm();
+    });
+
+    document.getElementById('confirmDeleteNo').addEventListener('click', () => {
+      closeDeleteConfirm();
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) closeDeleteConfirm();
+    });
+
+    // 레이캐스팅으로 트리 표면에 오너먼트 부착 또는 기존 오너먼트 클릭 삭제 확인
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let downX = 0;
+    let downY = 0;
+    let isDragging = false;
+
+    window.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+      isDragging = false;
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) {
+        isDragging = true;
+      }
+    });
+    window.addEventListener('pointerup', (event) => {
+      if (isDragging) return;
+      if (event.target.closest('#ui-bottom') || event.target.closest('#ui-top') || event.target.closest('#delete-modal-overlay')) return;
+
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+
+      // 1. 이미 트리에 달아둔 오너먼트를 클릭한 경우 -> 삭제 확인창 표시
+      if (ornaments.length > 0) {
+        const ornHits = raycaster.intersectObjects(ornaments, false);
+        if (ornHits.length > 0) {
+          openDeleteConfirm(ornHits[0].object);
+          return;
+        }
+      }
+
+      // 2. 트리 나뭇잎을 클릭한 경우 -> 선택된 오너먼트 부착
+      const intersects = raycaster.intersectObjects(leafMeshes);
+      if (intersects.length > 0) {
+        if (!currentTexture) {
+          document.getElementById('status-bar').textContent = '아래에서 오너먼트를 선택하거나 새로 골라주세요.';
+          return;
+        }
+        const hit = intersects[0];
+        const scaleVal = parseFloat(document.getElementById('sizeRange').value);
+        
+        const mat = new THREE.SpriteMaterial({
+          map: currentTexture,
+          transparent: true,
+          depthTest: true
+        });
+        const sprite = new THREE.Sprite(mat);
+
+        // 트리의 로컬 좌표계 기준으로 바깥쪽 방향을 계산해 나뭇잎 표면에 또렷하게 노출
+        const localHit = treeGroup.worldToLocal(hit.point.clone());
+        const radialOut = new THREE.Vector3(localHit.x, 0.12, localHit.z);
+        if (radialOut.lengthSq() < 0.0001) {
+          radialOut.set(0, 0.2, 1);
+        }
+        radialOut.normalize();
+
+        const surfaceOffset = 0.16 + scaleVal * 0.22;
+        sprite.position.copy(localHit).addScaledVector(radialOut, surfaceOffset);
+        sprite.scale.set(scaleVal, scaleVal, 1);
+        
+        treeGroup.add(sprite);
+        ornaments.push(sprite);
+        document.getElementById('status-bar').textContent = `오너먼트 장식 완료! (총 ${ornaments.length}개)`;
+        return;
+      }
+
+      // 3. 트리·오너먼트가 아닌 허공을 클릭한 경우 -> 오너먼트 선택 해제
+      clearOrnamentSelection();
+    });
+
+    // 마지막 오너먼트 취소
+    window.undoOrnament = function() {
+      if (ornaments.length > 0) {
+        const last = ornaments.pop();
+        treeGroup.remove(last);
+        document.getElementById('status-bar').textContent = `오너먼트 취소됨 (남은 개수: ${ornaments.length}개)`;
+      }
+    };
+
+    // 꼭대기 별 하강 애니메이션 트리거
+    window.completeTree = function() {
+      starGroup.position.set(0, 8.0 + sceneGroundOffsetY, 0);
+      starGroup.visible = true;
+      isStarAnimating = true;
+      starAnimProgress = 0;
+      document.getElementById('status-bar').textContent = '✨ 반짝이는 금빛 5각 별이 내려와 트리를 완성합니다!';
+    };
+
+    // 캔버스 스냅샷 PNG 저장 (트리 꼭대기 별부터 바닥까지 전체가 화면에 다 들어오도록 자동 프레이밍)
+    window.saveImage = function() {
+      const prevPos = camera.position.clone();
+      const prevTarget = controls.target.clone();
+
+      // 바닥 눈밭부터 꼭대기 5각 별까지 트리 전체 높이의 정중앙을 주시
+      const treeTotalHeight = 7.7;
+      const treeFocusCenter = new THREE.Vector3(0, 3.55 + sceneGroundOffsetY, 0);
+      const viewDir = prevPos.clone().sub(prevTarget);
+      if (viewDir.lengthSq() < 0.001) {
+        viewDir.set(0, 0.15, 1);
+      }
+      viewDir.normalize();
+
+      // 화면 세로/가로 비율을 모두 고려해 트리가 위아래로 절대 잘리지 않는 거리 계산
+      const vFov = THREE.MathUtils.degToRad(camera.fov);
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+      const distByHeight = (treeTotalHeight / 2) / Math.tan(vFov / 2);
+      const distByWidth = (4.8 / 2) / Math.tan(hFov / 2);
+      const fitDistance = Math.max(distByHeight, distByWidth) * 1.18;
+
+      camera.position.copy(treeFocusCenter).addScaledVector(viewDir, fitDistance);
+      camera.lookAt(treeFocusCenter);
+      camera.updateMatrixWorld();
+
+      renderer.render(scene, camera);
+      const dataURL = renderer.domElement.toDataURL('image/png');
+
+      // 원래 사용자 카메라 시점으로 즉시 복원
+      camera.position.copy(prevPos);
+      controls.target.copy(prevTarget);
+      camera.lookAt(prevTarget);
+      camera.updateMatrixWorld();
+      renderer.render(scene, camera);
+
+      const link = document.createElement('a');
+      link.download = 'my-pixel-tree.png';
+      link.href = dataURL;
+      link.click();
+      document.getElementById('status-bar').textContent = '트리 전체가 담긴 이미지가 저장되었습니다!';
+    };
+
+    // 낮 / 밤 시간대 환경 설정 (노을 옵션 제거)
+    let manualMode = 'auto';
+    window.setTimeMode = function(mode, btnEl) {
+      manualMode = mode;
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      updateEnvironment();
+    };
+
+    function updateEnvironment() {
+      let mode = manualMode;
+      if (mode === 'auto') {
+        const h = new Date().getHours();
+        mode = (h >= 7 && h < 18) ? 'day' : 'night';
+      }
+
+      if (mode === 'day') {
+        scene.background.setHex(0x82c4ff);
+        scene.fog.color.setHex(0x82c4ff);
+        dirLight.color.setHex(0xfffdf5);
+        dirLight.intensity = 2.05;
+        ambientLight.color.setHex(0xffffff);
+        ambientLight.intensity = 1.5;
+        fillLight.intensity = 0.85;
+        skyStarsGroup.visible = false;
+        sunGroup.visible = true;
+        moonGroup.visible = false;
+        document.getElementById('time-display').textContent = '시간: 낮';
+      } else {
+        scene.background.setHex(0x16243d);
+        scene.fog.color.setHex(0x16243d);
+        dirLight.color.setHex(0xeef8ff);
+        dirLight.intensity = 1.75;
+        ambientLight.color.setHex(0xd4ecff);
+        ambientLight.intensity = 1.45;
+        fillLight.intensity = 0.75;
+        skyStarsGroup.visible = true;
+        sunGroup.visible = false;
+        moonGroup.visible = true;
+        document.getElementById('time-display').textContent = '시간: 밤';
+      }
+    }
+    updateEnvironment();
+
+    // 메인 애니메이션 루프
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
+
+      // 밤하늘 픽셀 별 반짝임 애니메이션
+      if (skyStarsGroup.visible) {
+        for (let i = 0; i < skyStarList.length; i++) {
+          const s = skyStarList[i];
+          const twinkle = 0.7 + 0.5 * Math.sin(elapsed * s.speed + s.phase);
+          s.mesh.scale.setScalar(s.baseScale * twinkle);
+          s.mesh.material.opacity = 0.45 + 0.55 * Math.max(0, Math.sin(elapsed * s.speed + s.phase));
+        }
+      }
+
+      // 달 / 해 은은한 움직임 애니메이션
+      if (moonGroup.visible) {
+        moonGroup.rotation.y = Math.sin(elapsed * 0.4) * 0.12;
+        moonGlow.scale.setScalar(5.4 + Math.sin(elapsed * 1.4) * 0.25);
+      }
+      if (sunGroup.visible) {
+        sunGroup.rotation.z = elapsed * 0.15;
+        sunGlow.scale.setScalar(6.8 + Math.sin(elapsed * 1.8) * 0.35);
+      }
+
+      // 트리 반짝이 조명 은은한 점멸 애니메이션
+      if (treeLightBulbs.length > 0) {
+        for (let i = 0; i < treeLightBulbs.length; i++) {
+          const item = treeLightBulbs[i];
+          const pulse = 0.5 + 0.5 * Math.sin(elapsed * item.speed + item.phase);
+          item.bulb.material.opacity = 0.45 + 0.4 * pulse;
+          item.glow.material.opacity = 0.25 + 0.38 * pulse;
+          const gScale = 0.22 + 0.1 * pulse;
+          item.glow.scale.set(gScale, gScale, 1);
+        }
+      }
+
+      // 꼭대기 5각 별 하강 및 회전 애니메이션
+      if (isStarAnimating) {
+        starAnimProgress += 0.025;
+        const t = Math.min(1, starAnimProgress);
+        const easeOut = 1 - Math.pow(1 - t, 3);
+        const startY = 8.0 + sceneGroundOffsetY;
+        const targetY = treeTopY + sceneGroundOffsetY + 0.34;
+        starGroup.position.y = startY - (startY - targetY) * easeOut;
+        starGroup.rotation.y += 0.08;
+
+        if (starAnimProgress >= 1) {
+          isStarAnimating = false;
+        }
+      } else if (starGroup.visible) {
+        starGroup.rotation.y += 0.025;
+        const pulse = 1.2 + Math.sin(elapsed * 3.5) * 0.16;
+        glowSprite.scale.set(pulse, pulse, 1);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 창 크기 변경 대응
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
